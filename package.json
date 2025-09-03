@@ -6,18 +6,25 @@
     "dev": "next dev --turbopack",
     "build": "next build --turbopack",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "setup:google-drive": "echo 'Please follow the setup guide in GOOGLE_DRIVE_SETUP.md'"
   },
   "dependencies": {
     "@radix-ui/react-label": "^2.1.7",
     "@radix-ui/react-slot": "^1.2.3",
+    "@radix-ui/react-switch": "^1.2.6",
+    "@radix-ui/react-tabs": "^1.1.13",
+    "child_process": "^1.0.2",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "googleapis": "^159.0.0",
     "lucide-react": "^0.542.0",
     "next": "15.5.2",
+    "next-themes": "^0.4.6",
+    "openai": "^5.16.0",
     "react": "19.1.0",
     "react-dom": "19.1.0",
-    "shadcn": "^3.0.0",
+    "swr": "^2.3.6",
     "tailwind-merge": "^3.3.1"
   },
   "devDependencies": {
@@ -28,6 +35,7 @@
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "15.5.2",
+    "shadcn": "^3.1.0",
     "tailwindcss": "^4",
     "tw-animate-css": "^1.3.7",
     "typescript": "^5"
