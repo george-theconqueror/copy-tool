@@ -6,6 +6,7 @@ import ChallengeSetup from '@/components/ChallengeSetup';
 import ChannelSelector from '@/components/ChannelSelector';
 import TouchpointSelector from '@/components/TouchpointSelector';
 import { uploadFilesToBlob } from '@/lib/blob-upload';
+import { Button } from '@/components/ui/button';
 
 export default function NewPage() {
   const context = useContext(MarketingContext);
@@ -158,9 +159,9 @@ export default function NewPage() {
                     }
                   </p>
                   {uploadProgress > 0 && uploadProgress < 100 && (
-                    <div className="w-full bg-gray-200 rounded-full h-2 mt-4">
+                    <div className="w-full bg-muted rounded-full h-2 mt-4">
                       <div 
-                        className="bg-blue-600 h-2 rounded-full transition-all duration-300" 
+                        className="bg-primary h-2 rounded-full transition-all duration-300" 
                         style={{ width: `${uploadProgress}%` }}
                       ></div>
                     </div>
@@ -178,7 +179,7 @@ export default function NewPage() {
                       <h2 className="text-2xl font-bold mb-2">Campaign Created Successfully!</h2>
                       <p className="mb-6">{creationResult.message}</p>
                       
-                      <div className="rounded-lg p-6 mb-6">
+                      <div className="rounded-lg p-6 mb-6 border bg-card">
                         <h3 className="text-lg font-semibold mb-4">Campaign Structure</h3>
                         <div className="space-y-3">
                           <div className="flex items-center justify-between">
@@ -193,7 +194,7 @@ export default function NewPage() {
                             </a>
                           </div>
                           <div className="flex items-center justify-between">
-                            <span className="text-gray-700">Data Folder:</span>
+                            <span>Data Folder:</span>
                             <a 
                               href={creationResult.campaign.dataFolder.link} 
                               target="_blank" 
@@ -204,38 +205,38 @@ export default function NewPage() {
                             </a>
                           </div>
                           <div className="flex items-center justify-between">
-                            <span className="text-gray-700">Channels:</span>
+                            <span>Channels:</span>
                             <span>{creationResult.campaign.channels.length}</span>
                           </div>
                           <div className="flex items-center justify-between">
-                            <span className="text-gray-700">Total Folders:</span>
-                            <span className="text-gray-900">{creationResult.campaign.totalFolders}</span>
+                            <span >Total Folders:</span>
+                            <span>{creationResult.campaign.totalFolders}</span>
                           </div>
                           <div className="flex items-center justify-between">
-                            <span className="text-gray-700">Uploaded Files:</span>
-                            <span className="text-gray-900">{creationResult.campaign.totalFiles}</span>
+                            <span>Uploaded Files:</span>
+                            <span>{creationResult.campaign.totalFiles}</span>
                           </div>
                         </div>
                       </div>
 
                       <div className="flex space-x-4 justify-center">
-                        <button 
+                        <Button 
                           onClick={() => window.location.href = '/campaigns'}
-                          className="px-6 py-2 rounded-md transition-colors"
+                          variant="secondary"
                         >
                           View Campaigns
-                        </button>
-                        <button 
+                        </Button>
+                        <Button 
                           onClick={() => {
                             setCurrentStep(1);
                             setCreationResult(null);
                             setIsCreating(false);
                             // Context state is already cleaned up from successful creation
                           }}
-                          className="px-6 py-2 rounded-md transition-colors"
+                          variant="secondary"
                         >
                           Create Another
-                        </button>
+                        </Button>
                       </div>
                     </div>
                   ) : (
@@ -247,16 +248,16 @@ export default function NewPage() {
                       </div>
                       <h2 className="text-2xl font-bold mb-2">Campaign Creation Failed</h2>
                       <p className="mb-6">{creationResult.error}</p>
-                      <button 
+                      <Button 
                         onClick={() => {
                           setCurrentStep(3);
                           setCreationResult(null);
                           setIsCreating(false);
                         }}
-                        className="px-6 py-2 rounded-md transition-colors"
+                        variant="secondary"
                       >
                         Try Again
-                      </button>
+                      </Button>
                     </div>
                   )}
                 </div>
