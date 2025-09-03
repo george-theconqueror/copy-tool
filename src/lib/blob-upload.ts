@@ -4,6 +4,7 @@ export interface BlobUploadResult {
   url: string;
   pathname: string;
   size: number;
+  uploadPromise: Promise<void>;
 }
 
 /**
@@ -17,6 +18,12 @@ export async function uploadFileToBlob(
   onProgress?: (progress: number) => void
 ): Promise<BlobUploadResult> {
   try {
+    // Create a promise that resolves when upload is complete
+    let resolveUpload: () => void;
+    const uploadPromise = new Promise<void>((resolve) => {
+      resolveUpload = resolve;
+    });
+
     const blob = await upload(file.name, file, {
       access: 'public',
       handleUploadUrl: '/api/blob/upload',
@@ -26,10 +33,14 @@ export async function uploadFileToBlob(
       onProgress(100); // Blob upload is complete
     }
 
+    // Resolve the upload promise
+    resolveUpload!();
+
     return {
       url: blob.url,
       pathname: blob.pathname,
       size: file.size, // Use the original file size instead
+      uploadPromise,
     };
   } catch (error) {
     console.error('Error uploading file to Blob:', error);

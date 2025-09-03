@@ -26,6 +26,7 @@ export async function POST(request: Request): Promise<NextResponse> {
             'application/vnd.ms-powerpoint',
             'application/vnd.openxmlformats-officedocument.presentationml.presentation'
           ],
+          allowOverwrite: true, // Allow overwriting existing files
           tokenPayload: JSON.stringify({
             // Store metadata for cleanup if needed
             uploadedAt: new Date().toISOString(),

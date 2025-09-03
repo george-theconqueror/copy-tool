@@ -50,8 +50,12 @@ export default function NewPage() {
           setUploadProgress(progress);
         });
         
+        console.log('=== FRONTEND: Waiting for all uploads to complete ===');
+        // Wait for all uploads to be fully complete before proceeding
+        await Promise.all(blobResults.map(result => result.uploadPromise));
+        
         blobUrls = blobResults.map(result => result.url);
-        console.log('=== FRONTEND: Blob uploads completed ===');
+        console.log('=== FRONTEND: All Blob uploads fully completed ===');
         console.log('Blob URLs:', blobUrls);
       }
 
