@@ -5,6 +5,7 @@ import { MarketingContext } from '@/context/MarketingContext';
 import ChallengeSetup from '@/components/ChallengeSetup';
 import ChannelSelector from '@/components/ChannelSelector';
 import TouchpointSelector from '@/components/TouchpointSelector';
+import { uploadFilesToBlob } from '@/lib/blob-upload';
 
 export default function NewPage() {
   const context = useContext(MarketingContext);
@@ -15,6 +16,7 @@ export default function NewPage() {
   const [currentStep, setCurrentStep] = useState(1);
   const [isCreating, setIsCreating] = useState(false);
   const [creationResult, setCreationResult] = useState<any>(null);
+  const [uploadProgress, setUploadProgress] = useState(0);
 
   const handleTouchpointToggle = (touchpoint: { id: number; name: string; channel: string; purpose: string }) => {
     const isSelected = data.touchpoints.some(
@@ -32,36 +34,30 @@ export default function NewPage() {
     setCurrentStep(4);
     setIsCreating(true);
     setCreationResult(null);
+    setUploadProgress(0);
     
     try {
-      console.log('=== FRONTEND: Starting file processing ===');
+      console.log('=== FRONTEND: Starting Blob upload process ===');
       console.log('Total files in data.files:', data.files.length);
       console.log('Files:', data.files.map(f => ({ name: f.name, size: f.size, type: f.type })));
 
-      // Convert File objects to a format that can be sent via JSON
-      const filesData = await Promise.all(
-        data.files.map(async (file) => {
-          console.log(`Processing file: ${file.name}, size: ${file.size}, type: ${file.type}`);
-          const arrayBuffer = await file.arrayBuffer();
-          const uint8Array = new Uint8Array(arrayBuffer);
-          const content = Array.from(uint8Array);
-          console.log(`File ${file.name} converted - original size: ${file.size}, arrayBuffer size: ${arrayBuffer.byteLength}, content array length: ${content.length}`);
-          
-          return {
-            name: file.name,
-            type: file.type,
-            size: file.size,
-            content: content
-          };
-        })
-      );
+      let blobUrls: string[] = [];
 
-      console.log('=== FRONTEND: Files converted, sending to API ===');
-      console.log('filesData:', filesData.map(f => ({ name: f.name, size: f.size, contentLength: f.content.length })));
+      // Upload files to Vercel Blob if there are any files
+      if (data.files.length > 0) {
+        console.log('=== FRONTEND: Uploading files to Vercel Blob ===');
+        const blobResults = await uploadFilesToBlob(data.files, (progress) => {
+          setUploadProgress(progress);
+        });
+        
+        blobUrls = blobResults.map(result => result.url);
+        console.log('=== FRONTEND: Blob uploads completed ===');
+        console.log('Blob URLs:', blobUrls);
+      }
 
       const requestBody = {
         challengeName: data.challengeName,
-        files: filesData,
+        blobUrls: blobUrls, // Send Blob URLs instead of file content
         links: data.links,
         channels: data.channels,
         touchpoints: data.touchpoints,
@@ -72,6 +68,7 @@ export default function NewPage() {
       console.log('Challenge name:', data.challengeName);
       console.log('Channels:', data.channels.length);
       console.log('Touchpoints:', data.touchpoints.length);
+      console.log('Blob URLs count:', blobUrls.length);
 
       const response = await fetch('/api/create-campaign', {
         method: 'POST',
@@ -147,10 +144,23 @@ export default function NewPage() {
               {isCreating ? (
                 <div>
                   <div className="animate-spin rounded-full h-12 w-12 border-b-2 mx-auto mb-4"></div>
-                  <h2 className="text-2xl font-bold mb-2">Creating Campaign...</h2>
+                  <h2 className="text-2xl font-bold mb-2">
+                    {uploadProgress > 0 && uploadProgress < 100 ? 'Uploading Files...' : 'Creating Campaign...'}
+                  </h2>
                   <p>
-                    Setting up your campaign structure in Google Drive. This may take a few moments.
+                    {uploadProgress > 0 && uploadProgress < 100 
+                      ? `Uploading files to storage... ${uploadProgress}%`
+                      : 'Setting up your campaign structure in Google Drive. This may take a few moments.'
+                    }
                   </p>
+                  {uploadProgress > 0 && uploadProgress < 100 && (
+                    <div className="w-full bg-gray-200 rounded-full h-2 mt-4">
+                      <div 
+                        className="bg-blue-600 h-2 rounded-full transition-all duration-300" 
+                        style={{ width: `${uploadProgress}%` }}
+                      ></div>
+                    </div>
+                  )}
                 </div>
               ) : creationResult ? (
                 <div>
