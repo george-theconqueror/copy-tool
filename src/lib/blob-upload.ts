@@ -29,7 +29,7 @@ export async function uploadFileToBlob(
     return {
       url: blob.url,
       pathname: blob.pathname,
-      size: blob.size,
+      size: file.size, // Use the original file size instead
     };
   } catch (error) {
     console.error('Error uploading file to Blob:', error);
