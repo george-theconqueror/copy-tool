@@ -33,7 +33,7 @@ export interface TouchpointTextFile {
 export interface TouchpointWithContent {
   id: string;
   name: string;
-  files: any[];
+  files: DriveTouchpoint[];
   textFiles: TouchpointTextFile[];
   fileCount: number;
   textFileCount: number;

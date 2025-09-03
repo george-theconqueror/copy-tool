@@ -5,7 +5,7 @@ import { Button } from './ui/button';
 import { Card } from './ui/card';
 import { Badge } from './ui/badge';
 import { touchpoints } from '@/data/touchpoints';
-import { TouchpointSelectorProps, BaseTouchpoint } from '@/types/touchpoint';
+import { TouchpointSelectorProps } from '@/types/touchpoint';
 
 export default function TouchpointSelector({ 
   selectedChannels, 

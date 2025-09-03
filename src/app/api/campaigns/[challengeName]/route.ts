@@ -3,10 +3,10 @@ import { getCampaign } from '@/repository/drive';
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { challengeName: string } }
+  { params }: { params: Promise<{ challengeName: string }> }
 ) {
   try {
-    const { challengeName } = params;
+    const { challengeName } = await params;
     
     // Decode the challenge name in case it contains special characters
     const decodedChallengeName = decodeURIComponent(challengeName);

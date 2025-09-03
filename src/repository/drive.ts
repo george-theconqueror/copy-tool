@@ -80,7 +80,17 @@ export const createFileInPath = async (options: CreateFileOptions) => {
     }
 
     // Create file metadata
-    const fileMetadata: any = {
+    const fileMetadata: {
+      name: string;
+      mimeType: string;
+      description: string;
+      parents: string[];
+      permissions: Array<{
+        type: string;
+        role: string;
+        allowFileDiscovery?: boolean;
+      }>;
+    } = {
       name,
       mimeType,
       description: description || `File created via Copy Tool`,
@@ -734,11 +744,23 @@ export const createCampaign = async (campaignData: {
     }
 
     const results = {
-      challengeFolder: null as any,
-      dataFolder: null as any,
-      channelFolders: [] as any[],
-      touchpointFolders: [] as any[],
-      uploadedFiles: [] as any[]
+      challengeFolder: null as { name: string; id: string; link: string } | null,
+      dataFolder: null as { name: string; id: string; link: string } | null,
+      channelFolders: [] as Array<{
+        name: string;
+        id: string;
+        link: string;
+        touchpoints: Array<{
+          id: number;
+          name: string;
+          folderId: string;
+          folderName: string;
+          link: string;
+          purpose: string;
+        }>;
+      }>,
+      touchpointFolders: [] as Array<{ name: string; id: string; link: string }>,
+      uploadedFiles: [] as Array<{ name: string; id: string; link: string; size?: string; type?: string; originalUrl?: string; originalType?: string }>
     };
 
     // Step 1: Create main challenge folder in root
@@ -754,9 +776,9 @@ export const createCampaign = async (campaignData: {
     });
 
     results.challengeFolder = {
-      id: challengeFolder.data.id,
-      name: challengeFolder.data.name,
-      link: challengeFolder.data.webViewLink,
+      id: challengeFolder.data.id!,
+      name: challengeFolder.data.name!,
+      link: challengeFolder.data.webViewLink!,
     };
 
     // Step 2: Create "Data" folder inside challenge folder
@@ -772,9 +794,9 @@ export const createCampaign = async (campaignData: {
     });
 
     results.dataFolder = {
-      id: dataFolder.data.id,
-      name: dataFolder.data.name,
-      link: dataFolder.data.webViewLink,
+      id: dataFolder.data.id!,
+      name: dataFolder.data.name!,
+      link: dataFolder.data.webViewLink!,
     };
 
     // Step 3: Upload files to Data folder
@@ -797,10 +819,10 @@ export const createCampaign = async (campaignData: {
           });
 
           results.uploadedFiles.push({
-            id: uploadedFile.data.id,
-            name: uploadedFile.data.name,
-            link: uploadedFile.data.webViewLink,
-            size: uploadedFile.data.size,
+            id: uploadedFile.data.id!,
+            name: uploadedFile.data.name!,
+            link: uploadedFile.data.webViewLink!,
+            size: uploadedFile.data.size || undefined,
           });
         } catch (fileError) {
           console.error(`Error uploading file ${file.name}:`, fileError);
@@ -844,16 +866,16 @@ export const createCampaign = async (campaignData: {
             // Convert stream to buffer using proper stream handling
             const chunks: Buffer[] = [];
             const pdfBuffer = await new Promise<Buffer>((resolve, reject) => {
-              (exportedContent.data as any).on('data', (chunk: Buffer) => {
+              (exportedContent.data as NodeJS.ReadableStream).on('data', (chunk: Buffer) => {
                 chunks.push(chunk);
               });
               
-              (exportedContent.data as any).on('end', () => {
+              (exportedContent.data as NodeJS.ReadableStream).on('end', () => {
                 const buffer = Buffer.concat(chunks);
                 resolve(buffer);
               });
               
-              (exportedContent.data as any).on('error', (error: Error) => {
+              (exportedContent.data as NodeJS.ReadableStream).on('error', (error: Error) => {
                 reject(new Error(`Export stream error: ${error.message}`));
               });
             });
@@ -875,10 +897,10 @@ export const createCampaign = async (campaignData: {
             });
 
             results.uploadedFiles.push({
-              id: pdfFile.data.id,
-              name: pdfFile.data.name,
-              link: pdfFile.data.webViewLink,
-              size: pdfFile.data.size,
+              id: pdfFile.data.id!,
+              name: pdfFile.data.name!,
+              link: pdfFile.data.webViewLink!,
+              size: pdfFile.data.size || undefined,
               type: 'exported-pdf',
               originalUrl: link,
               originalType: linkType,
@@ -907,10 +929,17 @@ export const createCampaign = async (campaignData: {
       });
 
       const channelFolderData = {
-        id: channelFolder.data.id,
-        name: channelFolder.data.name,
-        link: channelFolder.data.webViewLink,
-        touchpoints: [] as any[]
+        id: channelFolder.data.id!,
+        name: channelFolder.data.name!,
+        link: channelFolder.data.webViewLink!,
+        touchpoints: [] as Array<{
+          id: number;
+          name: string;
+          folderId: string;
+          folderName: string;
+          link: string;
+          purpose: string;
+        }>
       };
 
       // Step 5: Create touchpoint folders for this channel
@@ -933,9 +962,9 @@ export const createCampaign = async (campaignData: {
         channelFolderData.touchpoints.push({
           id: touchpoint.id,
           name: touchpoint.name,
-          folderId: touchpointFolder.data.id,
-          folderName: touchpointFolder.data.name,
-          link: touchpointFolder.data.webViewLink,
+          folderId: touchpointFolder.data.id!,
+          folderName: touchpointFolder.data.name!,
+          link: touchpointFolder.data.webViewLink!,
           purpose: touchpoint.purpose,
         });
       }
@@ -1364,7 +1393,7 @@ export const getCampaign = async (challengeName: string, workspaceId?: string) =
 };
 
 // Export all functions
-export default {
+const driveRepository = {
   createFileInPath,
   createFolderInPath,
   resolveFolderPath,
@@ -1382,3 +1411,5 @@ export default {
   getCampaign,
   getTouchpointContent,
 };
+
+export default driveRepository;
